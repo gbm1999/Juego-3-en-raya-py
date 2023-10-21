@@ -189,16 +189,11 @@ def guardar_estado_juego():
     cursor.execute('INSERT INTO juego (jugador_actual, tablero) VALUES (?, ?)',
                    (jugador_actual, cadena))
     db.commit()
-    cursor.execute('SELECT jugador_actual, tablero FROM juego ORDER BY id DESC LIMIT 1')
-    row = cursor.fetchone()
     
     cursor.execute('INSERT INTO registro_partidas (victorias1, victorias2, partidas) VALUES (?, ?, ?)',
                    (estadisticas_jugadores["X"]["victorias"],estadisticas_jugadores["O"]["victorias"], partidas_jugadas))
     db.commit()
 
-    if row:
-        jugador_actual, tablero = row
-        return jugador_actual, tablero
     return jsonify(obtener_tablero())
 
 

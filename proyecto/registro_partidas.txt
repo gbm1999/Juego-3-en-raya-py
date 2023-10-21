@@ -11,3 +11,4 @@ Partida 3: Jugador O ganó.
 Partida 1: Jugador O ganó.
 Partida 1: Jugador O ganó.
 Partida 2: Jugador O ganó.
+Partida 1: Jugador X ganó.
