@@ -157,21 +157,31 @@ def obtener_estado_juego():
     cursor = db.cursor()
     cursor.execute('SELECT jugador_actual, tablero FROM juego ORDER BY id DESC LIMIT 1')
     row = cursor.fetchone()
+
+    cursor.execute('SELECT victorias1, victorias2, partidas FROM registro_partidas ORDER BY id DESC LIMIT 1')
+    row2 = cursor.fetchone()
     if row:
         global tablero
+        global jugador_actual
+        global estadisticas_jugadores
+        global partidas_jugadas
         jugador_actual, cadena_tablero = row
+        estadisticas_jugadores["X"]["victorias"], estadisticas_jugadores["O"]["victorias"], partidas_jugadas = row2
         print(tablero)
         tablero = json.loads(cadena_tablero)
-        for row in tablero:
-            print(row)
-        return jsonify(jugador_actual, tablero)
-    return jsonify(jugador_actual, tablero)
+        print(tablero)
+
+        return jsonify(jugador_actual, tablero, estadisticas_jugadores, partidas_jugadas)
+    return jsonify(jugador_actual, tablero, estadisticas_jugadores, partidas_jugadas)
 
 @app.route('/guardar-estado', methods=['GET'])
 def guardar_estado_juego():
     print("guardado ")
     global jugador_actual
     global tablero
+    global estadisticas_jugadores
+    global partidas_jugadas
+
     db = get_db()
     cursor = db.cursor()
     cadena = json.dumps(tablero)
@@ -181,6 +191,11 @@ def guardar_estado_juego():
     db.commit()
     cursor.execute('SELECT jugador_actual, tablero FROM juego ORDER BY id DESC LIMIT 1')
     row = cursor.fetchone()
+    
+    cursor.execute('INSERT INTO registro_partidas (victorias1, victorias2, partidas) VALUES (?, ?, ?)',
+                   (estadisticas_jugadores["X"]["victorias"],estadisticas_jugadores["O"]["victorias"], partidas_jugadas))
+    db.commit()
+
     if row:
         jugador_actual, tablero = row
         return jugador_actual, tablero

@@ -6,6 +6,7 @@ CREATE TABLE juego (
 
 CREATE TABLE registro_partidas (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    jugador_ganador TEXT,
-    fecha_ganada TIMESTAMP
+    victorias1 INTEGER,
+    victorias2 INTEGER,
+    partidas INTEGER
 );

@@ -54,7 +54,7 @@
         <button id="guardar-estado">Guardar Estado del Juego</button>
         <div>
             <button id="cargar-estado">Cargar Estado del Juego</button>
-            <label for="fila">(Cuando se Cargue estado del juego recargar página para ver los cambios)</label>
+            <label for="fila">(doble click)</label>
         </div>
     </div>
     
@@ -136,6 +136,8 @@
                 .then(data => {
                     const jugador_actual = data[0];
                     const tablero = JSON.parse(data[1]);
+                    const estadisticas = data[2];
+                    const partidas_jugadas = data[3];
 
                     // Actualiza el tablero y el jugador actual en el frontend
                     for (let fila = 0; fila < 3; fila++) {
@@ -151,10 +153,12 @@
                             tableroElement.children[fila + i + columna].textContent = casilla;
                         }
                     }
-
+                    partidas_jugadasElement.textContent = "partidas jugadas: " + JSON.stringify(partidas_jugadas, null, 2);
+                    estadisticasElement.textContent = JSON.stringify(estadisticas, null, 2);
                     // Actualiza el jugador actual
                     estadoForm.textContent = `Turno del jugador ${jugador_actual}`;
                 });
+                actualizarTableroYEstadisticas();
         });
 
 
