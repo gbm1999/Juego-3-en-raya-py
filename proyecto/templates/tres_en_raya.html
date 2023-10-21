@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Tres en Raya</title>
+        <style>
+            .tablero {
+                display: grid;
+                grid-template-columns: repeat(3, 100px);
+                grid-template-rows: repeat(3, 100px);
+                gap: 5px;
+            }
+            
+            .casilla {
+                width: 100px;
+                height: 100px;
+                text-align: center;
+                font-size: 24px;
+                border: 1px solid #000;
+            }
+        </style>
+    </head>
+<body>
+    <h1>Tres en Raya</h1>
+
+    <div>
+        <h2>Tablero</h2>
+        <pre id="tablero"></pre>
+    </div>
+
+    <div>
+        <h2>Estadísticas</h2>
+        <pre id="estadisticas"></pre>
+        <pre id="partidas_jugadas"></pre>
+    </div>
+    <button id="consultar-registro">Consultar Registro</button>
+    <pre id="registro"></pre>
+
+    <div>
+        <h2>Realizar Movimiento</h2>
+        <div>
+            <pre id="estado"></pre>
+        </div>
+        <form id="movimiento-form">
+            <label for="fila">Fila (0-2):</label>
+            <input type="number" id="fila" name="fila" min="0" max="2" required><br>
+            <label for="columna">Columna (0-2):</label>
+            <input type="number" id="columna" name="columna" min="0" max="2" required><br>
+            <input type="submit" value="Realizar Movimiento">
+        </form>
+    </div>
+
+    <div>
+        <h2>Estado del Juego</h2>
+        <button id="guardar-estado">Guardar Estado del Juego</button>
+        <div>
+            <button id="cargar-estado">Cargar Estado del Juego</button>
+            <label for="fila">(Cuando se Cargue estado del juego recargar página para ver los cambios)</label>
+        </div>
+    </div>
+    
+
+    <script>
+        const estadoForm = document.getElementById('estado');
+        var tableroElement = document.getElementById('tablero');
+        const estadisticasElement = document.getElementById('estadisticas');
+        const partidas_jugadasElement = document.getElementById('partidas_jugadas');
+        const movimientoForm = document.getElementById('movimiento-form');
+        const registroButton = document.getElementById('consultar-registro');
+        const registroElement = document.getElementById('registro');
+        const cargarEstadoButton = document.getElementById('cargar-estado');
+        const guardarEstadoButton = document.getElementById('guardar-estado');
+
+
+        function actualizarTableroYEstadisticas() {
+            fetch('/tablero')
+                .then(response => response.json())
+                .then(data => {
+                    const tablero = data.tablero;
+                    tableroElement.innerHTML = ''; // Limpiar el tablero antes de actualizar
+
+                    for (let fila = 0; fila < 3; fila++) {
+                        for (let columna = 0; columna < 3; columna++) {
+                            const casilla = document.createElement('span');
+                            casilla.classList.add('casilla');
+                            casilla.textContent = tablero[fila][columna];
+                            tableroElement.appendChild(casilla);
+                        }
+                        const saltoDeLinea = document.createElement('br');
+                        tableroElement.appendChild(saltoDeLinea);
+                    }
+
+                    estadisticasElement.textContent = JSON.stringify(data.estadisticas, null, 2);
+                    partidas_jugadasElement.textContent = "partidas jugadas: " + JSON.stringify(data.partidas_jugadas, null, 2);
+                });
+        }
+
+        actualizarTableroYEstadisticas();
+
+        movimientoForm.addEventListener('submit', function (e) {
+            e.preventDefault();
+
+            const formData = new FormData(movimientoForm);
+            const jsonData = {};
+            formData.forEach((value, key) => {
+                jsonData[key] = value;
+            });
+
+            console.log(jsonData)
+
+            fetch('/mover', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json' // Establece el encabezado JSON
+                },
+                body: JSON.stringify(jsonData) // Convierte los datos del formulario en JSON
+            })
+            .then(response => response.text())
+            .then(message => {
+                estadoForm.textContent = message;
+                actualizarTableroYEstadisticas();
+            });
+            movimientoForm.reset();
+        });
+
+        registroButton.addEventListener('click', function () {
+        fetch('/registro')
+            .then(response => response.json())
+            .then(data => {
+                registroElement.textContent = data.join('\n');
+            });
+        });
+
+        cargarEstadoButton.addEventListener('click', function () {
+            fetch('/cargar-estado')
+                .then(response => response.json())
+                .then(data => {
+                    const jugador_actual = data[0];
+                    const tablero = JSON.parse(data[1]);
+
+                    // Actualiza el tablero y el jugador actual en el frontend
+                    for (let fila = 0; fila < 3; fila++) {
+                        for (let columna = 0; columna < 3; columna++) {
+                            let i = 0;
+                            const casilla = tablero[fila][columna];
+                            if (fila == 1) {
+                                i = 3;
+                            }
+                            if (fila == 2) {
+                                i = 6;
+                            }
+                            tableroElement.children[fila + i + columna].textContent = casilla;
+                        }
+                    }
+
+                    // Actualiza el jugador actual
+                    estadoForm.textContent = `Turno del jugador ${jugador_actual}`;
+                });
+        });
+
+
+    guardarEstadoButton.addEventListener('click', function () {
+        const casillas = [];
+
+        tableroElement = document.getElementById('tablero');
+        
+        // Guarda el estado en la base de datos
+        fetch('/guardar-estado')
+        .then(response => response.text())
+        .then(message => {
+            estadoForm.textContent = message;
+        });
+    });
+
+    </script>
+</body>
+</html>

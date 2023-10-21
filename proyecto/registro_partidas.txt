@@ -1,0 +1,6 @@
+Partida 1: Ambos jugadores empataron.
+Partida 2: Jugador O ganó.
+Partida 1: Jugador X ganó.
+Partida 1: Jugador X ganó.
+Partida 1: Jugador X ganó.
+Partida 1: Jugador X ganó.

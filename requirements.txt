@@ -1,0 +1,10 @@
+instalar:
+python -m pip install flask
+pip install pysqlite3
+Agregar las variables de entorno en windows:
+C:\> set FLASK_APP=app.py
+C:\> set FLASK_ENV=development
+correr aplicación situados en /proyecto/:
+python .\3raya.py
+abrir navegador e introducir la siguiente url:
+http://127.0.0.1:5000/
