@@ -1,10 +1,27 @@
 import sqlite3
-from flask import Flask, request, jsonify, render_template, g
-import datetime
+from flask import Flask, request, jsonify, render_template, redirect, url_for, g
 import json
+from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 
 
 app = Flask(__name__)
+app.secret_key = 'tu_clave_secreta'  # Cambia esto por una clave segura en producción
+login_manager = LoginManager()
+login_manager.init_app(app)
+login_manager.login_view = "login"
+# Modelos de usuario
+class User(UserMixin):
+    def __init__(self, id):
+        self.id = id
+
+# Mock de base de datos de usuarios (reemplazar con una base de datos real)
+usuarios = {"usuario1": {"password": "password1"}, "usuario2": {"password": "password2"}}
+
+@login_manager.user_loader
+def load_user(user_id):
+    return User(user_id)
+
+
 # Configuración de SQLite
 app.config['DATABASE'] = 'juego.db'
 
@@ -86,6 +103,7 @@ def verificar_ganador(jugador):
     return False
 
 @app.route('/')
+@login_required
 def index():
     return render_template('tres_en_raya.html')
 
@@ -195,6 +213,29 @@ def guardar_estado_juego():
     db.commit()
 
     return jsonify(obtener_tablero())
+
+# Ruta para iniciar sesión
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST':
+        usuario = request.form['usuario']
+        contraseña = request.form['contraseña']
+
+        if usuario in usuarios and usuarios[usuario]["password"] == contraseña:
+            user = User(usuario)
+            login_user(user)
+            return redirect(url_for("index"))
+        else:
+            return "Credenciales incorrectas. Inténtalo de nuevo."
+
+    return render_template('login.html')
+
+# Ruta para cerrar sesión
+@app.route('/logout')
+@login_required
+def logout():
+    logout_user()
+    return redirect(url_for('index'))
 
 
 if __name__ == "__main__":

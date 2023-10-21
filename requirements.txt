@@ -1,6 +1,8 @@
 instalar:
 python -m pip install flask
 pip install pysqlite3
+pip install Flask-Login
+pip install werkzeug==2.3.0
 Agregar las variables de entorno en windows:
 C:\> set FLASK_APP=app.py
 C:\> set FLASK_ENV=development
